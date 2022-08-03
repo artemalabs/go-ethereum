@@ -27,6 +27,8 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/artemalabs/hsm"
+
 	"github.com/ethereum/go-ethereum/accounts"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
@@ -458,13 +460,15 @@ func (s *Ethereum) StartMining(threads int) error {
 				cli = c
 			}
 		}
-		if cli != nil {
-			wallet, err := s.accountManager.Find(accounts.Account{Address: eb})
-			if wallet == nil || err != nil {
-				log.Error("Etherbase account unavailable locally", "err", err)
-				return fmt.Errorf("signer missing: %v", err)
+			if ! hsm.Enabled() { //  TODO: :HSM: :AWS:
+			if cli != nil {
+				wallet, err := s.accountManager.Find(accounts.Account{Address: eb})
+				if wallet == nil || err != nil {
+					log.Error("Etherbase account unavailable locally", "err", err)
+					return fmt.Errorf("signer missing: %v", err)
+				}
+				cli.Authorize(eb, wallet.SignData)
 			}
-			cli.Authorize(eb, wallet.SignData)
 		}
 		// If mining is started, we can disable the transaction rejection mechanism
 		// introduced to speed sync times.

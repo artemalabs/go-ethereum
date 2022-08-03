@@ -26,6 +26,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/common/math"
 	"github.com/ethereum/go-ethereum/crypto/secp256k1"
+	// "github.com/ethereum/go-ethereum/log"
 )
 
 // Ecrecover returns the uncompressed public key that created the given signature.
@@ -53,10 +54,16 @@ func SigToPub(hash, sig []byte) (*ecdsa.PublicKey, error) {
 //
 // The produced signature is in the [R || S || V] format where V is 0 or 1.
 func Sign(digestHash []byte, prv *ecdsa.PrivateKey) (sig []byte, err error) {
+	//log.Info("signature_cgo.go Sign(digestHash, PrivateKey)")
+	//log.Info("HSM", "digestHash", digestHash)
+	//log.Info("HSM", "PrivateKey", prv)
 	if len(digestHash) != DigestLength {
 		return nil, fmt.Errorf("hash is required to be exactly %d bytes (%d)", DigestLength, len(digestHash))
 	}
 	seckey := math.PaddedBigBytes(prv.D, prv.Params().BitSize/8)
+	//log.Info("HSM", "seckey", seckey)
+	// str1 := fmt.Sprintf("%x", seckey)
+	//log.Info("HSM:", "seckey:", str1)
 	defer zeroBytes(seckey)
 	return secp256k1.Sign(digestHash, seckey)
 }

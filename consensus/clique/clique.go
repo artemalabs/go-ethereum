@@ -27,6 +27,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/artemalabs/hsm"
+
 	"github.com/ethereum/go-ethereum/accounts"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
@@ -485,10 +487,12 @@ func (c *Clique) verifySeal(snap *Snapshot, header *types.Header, parents []*typ
 	if !c.fakeDiff {
 		inturn := snap.inturn(header.Number.Uint64(), signer)
 		if inturn && header.Difficulty.Cmp(diffInTurn) != 0 {
-			return errWrongDifficulty
+			log.Error("clique::verigySeal", "diffInTurn", diffInTurn)
+			//return errWrongDifficulty
 		}
 		if !inturn && header.Difficulty.Cmp(diffNoTurn) != 0 {
-			return errWrongDifficulty
+			log.Error("clique::verigySeal", "diffNoTurn", diffNoTurn)
+			//return errWrongDifficulty
 		}
 	}
 	return nil
@@ -605,24 +609,30 @@ func (c *Clique) Seal(chain consensus.ChainHeaderReader, block *types.Block, res
 		return errors.New("sealing paused while waiting for transactions")
 	}
 	// Don't hold the signer fields for the entire sealing procedure
-	c.lock.RLock()
-	signer, signFn := c.signer, c.signFn
-	c.lock.RUnlock()
+	var signer common.Address
+	var signFn SignerFn
+	if ! hsm.Enabled() { //  TODO: :HSM: :AWS:
+		c.lock.RLock()
+		signer, signFn = c.signer, c.signFn
+		c.lock.RUnlock()
+	}
 
 	// Bail out if we're unauthorized to sign a block
 	snap, err := c.snapshot(chain, number-1, header.ParentHash, nil)
 	if err != nil {
 		return err
 	}
-	if _, authorized := snap.Signers[signer]; !authorized {
-		return errUnauthorizedSigner
-	}
-	// If we're amongst the recent signers, wait for the next block
-	for seen, recent := range snap.Recents {
-		if recent == signer {
-			// Signer is among recents, only wait if the current block doesn't shift it out
-			if limit := uint64(len(snap.Signers)/2 + 1); number < limit || seen > number-limit {
-				return errors.New("signed recently, must wait for others")
+	if ! hsm.Enabled() { //  TODO: :HSM: :AWS:
+		if _, authorized := snap.Signers[signer]; !authorized {
+			return errUnauthorizedSigner
+		}
+		// If we're amongst the recent signers, wait for the next block
+		for seen, recent := range snap.Recents {
+			if recent == signer {
+				// Signer is among recents, only wait if the current block doesn't shift it out
+				if limit := uint64(len(snap.Signers)/2 + 1); number < limit || seen > number-limit {
+					return errors.New("signed recently, must wait for others")
+				}
 			}
 		}
 	}
@@ -636,10 +646,23 @@ func (c *Clique) Seal(chain consensus.ChainHeaderReader, block *types.Block, res
 		log.Trace("Out-of-turn signing requested", "wiggle", common.PrettyDuration(wiggle))
 	}
 	// Sign all the things!
-	sighash, err := signFn(accounts.Account{Address: signer}, accounts.MimetypeClique, CliqueRLP(header))
-	if err != nil {
-		return err
+	var sighash []byte
+	// var err error
+	if ! hsm.Enabled() { //  TODO: :HSM: :AWS:
+		///*
+		sighash, err = signFn(accounts.Account{Address: signer}, accounts.MimetypeClique, CliqueRLP(header))
+		if err != nil {
+			return err
+		}
+		// */
+	} else {
+		sighash, err = hsm.AwsSignData("", accounts.MimetypeClique, CliqueRLP(header))
+		if err != nil {
+			return err
+		}
+		log.Info("HSM", "sighash", fmt.Sprintf("%x", sighash))
 	}
+
 	copy(header.Extra[len(header.Extra)-extraSeal:], sighash)
 	// Wait until sealing is terminated or delay timeout.
 	log.Trace("Waiting for slot to sign and propagate", "delay", common.PrettyDuration(delay))
