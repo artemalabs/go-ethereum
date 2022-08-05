@@ -647,20 +647,16 @@ func (c *Clique) Seal(chain consensus.ChainHeaderReader, block *types.Block, res
 	}
 	// Sign all the things!
 	var sighash []byte
-	// var err error
 	if ! hsm.Enabled() { //  TODO: :HSM: :AWS:
-		///*
 		sighash, err = signFn(accounts.Account{Address: signer}, accounts.MimetypeClique, CliqueRLP(header))
 		if err != nil {
 			return err
 		}
-		// */
 	} else {
 		sighash, err = hsm.AwsSignData("", accounts.MimetypeClique, CliqueRLP(header))
 		if err != nil {
 			return err
 		}
-		log.Info("HSM", "sighash", fmt.Sprintf("%x", sighash))
 	}
 
 	copy(header.Extra[len(header.Extra)-extraSeal:], sighash)
