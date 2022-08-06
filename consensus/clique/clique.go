@@ -27,8 +27,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/artemalabs/hsm"
-
 	"github.com/ethereum/go-ethereum/accounts"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
@@ -611,28 +609,24 @@ func (c *Clique) Seal(chain consensus.ChainHeaderReader, block *types.Block, res
 	// Don't hold the signer fields for the entire sealing procedure
 	var signer common.Address
 	var signFn SignerFn
-	if ! hsm.Enabled() { //  TODO: :HSM: :AWS:
-		c.lock.RLock()
-		signer, signFn = c.signer, c.signFn
-		c.lock.RUnlock()
-	}
+	c.lock.RLock()
+	signer, signFn = c.signer, c.signFn
+	c.lock.RUnlock()
 
 	// Bail out if we're unauthorized to sign a block
 	snap, err := c.snapshot(chain, number-1, header.ParentHash, nil)
 	if err != nil {
 		return err
 	}
-	if ! hsm.Enabled() { //  TODO: :HSM: :AWS:
-		if _, authorized := snap.Signers[signer]; !authorized {
-			return errUnauthorizedSigner
-		}
-		// If we're amongst the recent signers, wait for the next block
-		for seen, recent := range snap.Recents {
-			if recent == signer {
-				// Signer is among recents, only wait if the current block doesn't shift it out
-				if limit := uint64(len(snap.Signers)/2 + 1); number < limit || seen > number-limit {
-					return errors.New("signed recently, must wait for others")
-				}
+	if _, authorized := snap.Signers[signer]; !authorized {
+		return errUnauthorizedSigner
+	}
+	// If we're amongst the recent signers, wait for the next block
+	for seen, recent := range snap.Recents {
+		if recent == signer {
+			// Signer is among recents, only wait if the current block doesn't shift it out
+			if limit := uint64(len(snap.Signers)/2 + 1); number < limit || seen > number-limit {
+				return errors.New("signed recently, must wait for others")
 			}
 		}
 	}
@@ -646,17 +640,9 @@ func (c *Clique) Seal(chain consensus.ChainHeaderReader, block *types.Block, res
 		log.Trace("Out-of-turn signing requested", "wiggle", common.PrettyDuration(wiggle))
 	}
 	// Sign all the things!
-	var sighash []byte
-	if ! hsm.Enabled() { //  TODO: :HSM: :AWS:
-		sighash, err = signFn(accounts.Account{Address: signer}, accounts.MimetypeClique, CliqueRLP(header))
-		if err != nil {
-			return err
-		}
-	} else {
-		sighash, err = hsm.AwsSignData("", accounts.MimetypeClique, CliqueRLP(header))
-		if err != nil {
-			return err
-		}
+	sighash, err := signFn(accounts.Account{Address: signer}, accounts.MimetypeClique, CliqueRLP(header))
+	if err != nil {
+		return err
 	}
 
 	copy(header.Extra[len(header.Extra)-extraSeal:], sighash)

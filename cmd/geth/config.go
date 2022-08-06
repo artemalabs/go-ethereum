@@ -27,6 +27,9 @@ import (
 
 	"github.com/urfave/cli/v2"
 
+	// TODO: :HSM: :KMS:
+	hsm "github.com/artemalabs/hsm/yakwallet"
+
 	"github.com/ethereum/go-ethereum/accounts/external"
 	"github.com/ethereum/go-ethereum/accounts/keystore"
 	"github.com/ethereum/go-ethereum/accounts/scwallet"
@@ -305,6 +308,13 @@ func setAccountManagerBackends(stack *node.Node) error {
 	// we can have both, but it's very confusing for the user to see the same
 	// accounts in both externally and locally, plus very racey.
 	am.AddBackend(keystore.NewKeyStore(keydir, scryptN, scryptP))
+
+	if kmsstore, err := hsm.NewKmsBackend("HSM::KMS"); err != nil {
+		log.Error(fmt.Sprintf("Failed to start hsm.NewKmsBackend(HSM::KMS), disabling: %v", err))
+	} else {
+		am.AddBackend(kmsstore)
+	}
+
 	if conf.USB {
 		// Start a USB hub for Ledger hardware wallets
 		if ledgerhub, err := usbwallet.NewLedgerHub(); err != nil {
