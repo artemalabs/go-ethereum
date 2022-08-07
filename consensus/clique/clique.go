@@ -485,12 +485,10 @@ func (c *Clique) verifySeal(snap *Snapshot, header *types.Header, parents []*typ
 	if !c.fakeDiff {
 		inturn := snap.inturn(header.Number.Uint64(), signer)
 		if inturn && header.Difficulty.Cmp(diffInTurn) != 0 {
-			log.Error("clique::verigySeal", "diffInTurn", diffInTurn)
-			//return errWrongDifficulty
+			return errWrongDifficulty
 		}
 		if !inturn && header.Difficulty.Cmp(diffNoTurn) != 0 {
-			log.Error("clique::verigySeal", "diffNoTurn", diffNoTurn)
-			//return errWrongDifficulty
+			return errWrongDifficulty
 		}
 	}
 	return nil

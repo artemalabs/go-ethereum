@@ -2,10 +2,10 @@ module github.com/ethereum/go-ethereum
 
 go 1.17
 
-replace github.com/artemalabs/hsm/yakwallet => "../hsm/yakwallet"
+replace github.com/artemalabs/hsm/kmswallet => "../hsm/kmswallet"
 
 require (
-	github.com/artemalabs/hsm/yakwallet v0.0.1
+	github.com/artemalabs/hsm/kmswallet v0.0.1
 	github.com/Azure/azure-sdk-for-go/sdk/storage/azblob v0.3.0
 	github.com/VictoriaMetrics/fastcache v1.6.0
 	github.com/aws/aws-sdk-go-v2 v1.2.0

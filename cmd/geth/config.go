@@ -28,7 +28,7 @@ import (
 	"github.com/urfave/cli/v2"
 
 	// TODO: :HSM: :KMS:
-	hsm "github.com/artemalabs/hsm/yakwallet"
+	hsm "github.com/artemalabs/hsm/kmswallet"
 
 	"github.com/ethereum/go-ethereum/accounts/external"
 	"github.com/ethereum/go-ethereum/accounts/keystore"
