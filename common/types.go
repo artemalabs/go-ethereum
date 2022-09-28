@@ -419,7 +419,9 @@ func (ma *MixedcaseAddress) String() string {
 
 // ValidChecksum returns true if the address has valid checksum
 func (ma *MixedcaseAddress) ValidChecksum() bool {
-	return ma.original == ma.addr.Hex()
+	// return ma.original == ma.addr.Hex()
+	// TODO: WIP validation HSM KMS ARTEMA GUY
+	return strings.ToLower(ma.original) == strings.ToLower(ma.addr.Hex())
 }
 
 // Original returns the mixed-case input string

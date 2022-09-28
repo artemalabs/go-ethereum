@@ -25,6 +25,10 @@ import (
 	"os"
 	"reflect"
 
+	// TODO: :HSM: :KMS:
+	// hsm "github.com/artemalabs/hsm/yakwallet"
+	hsm "github.com/artemalabs/hsm/yakwallet"
+
 	"github.com/ethereum/go-ethereum/accounts"
 	"github.com/ethereum/go-ethereum/accounts/keystore"
 	"github.com/ethereum/go-ethereum/accounts/scwallet"
@@ -140,6 +144,18 @@ func StartClefAccountManager(ksLocation string, nousb, lightKDF bool, scpath str
 	if len(ksLocation) > 0 {
 		backends = append(backends, keystore.NewKeyStore(ksLocation, n, p))
 	}
+	// TODO: HSM KMS ARTEMA GUY
+	if false {
+		log.Info("StartClefAccountManager: ENABLED ARTEMALABS HSM:KSM ACCOUNT MANAGER")
+		if kmsstore, err := hsm.NewKmsBackend("HSM::KMS"); err != nil {
+			log.Error(fmt.Sprintf("Failed to start hsm.NewKmsBackend(HSM::KMS), disabling: %v", err))
+		} else {
+			backends = append(backends, kmsstore)
+		}
+	} else {
+		log.Warn("StartClefAccountManager: DISABLED ARTEMALABS HSM:KSM ACCOUNT MANAGER")
+	}
+
 	if !nousb {
 		// Start a USB hub for Ledger hardware wallets
 		if ledgerhub, err := usbwallet.NewLedgerHub(); err != nil {

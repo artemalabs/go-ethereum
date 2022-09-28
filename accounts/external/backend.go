@@ -242,14 +242,23 @@ func (api *ExternalSigner) SignTx(account accounts.Account, tx *types.Transactio
 }
 
 func (api *ExternalSigner) SignTextWithPassphrase(account accounts.Account, passphrase string, text []byte) ([]byte, error) {
-	return []byte{}, fmt.Errorf("password-operations not supported on external signers")
+	// TODO: HSM KMS ARTEMA GUY
+	log.Warn("1. password-operations not supported on external signers")
+	return api.SignText(account, text)
+	// return []byte{}, fmt.Errorf("1. password-operations not supported on external signers")
 }
 
 func (api *ExternalSigner) SignTxWithPassphrase(account accounts.Account, passphrase string, tx *types.Transaction, chainID *big.Int) (*types.Transaction, error) {
-	return nil, fmt.Errorf("password-operations not supported on external signers")
+	// TODO: HSM KMS ARTEMA GUY
+	log.Warn("2. password-operations not supported on external signers")
+	return api.SignTx(account, tx, chainID)
+	// return nil, fmt.Errorf("2. password-operations not supported on external signers")
 }
 func (api *ExternalSigner) SignDataWithPassphrase(account accounts.Account, passphrase, mimeType string, data []byte) ([]byte, error) {
-	return nil, fmt.Errorf("password-operations not supported on external signers")
+	// TODO: HSM KMS ARTEMA GUY
+	log.Warn("3. password-operations not supported on external signers")
+	return api.SignData(account, mimeType, data)
+	// return nil, fmt.Errorf("3. password-operations not supported on external signers")
 }
 
 func (api *ExternalSigner) listAccounts() ([]common.Address, error) {

@@ -543,7 +543,7 @@ func signer(c *cli.Context) error {
 				foundShaSum := hex.EncodeToString(shasum[:])
 				storedShasum, _ := configStorage.Get("ruleset_sha256")
 				if storedShasum != foundShaSum {
-					log.Warn("Rule hash not attested, disabling", "hash", foundShaSum, "attested", storedShasum)
+					log.Error("Rule hash not attested, disabling", "hash", foundShaSum, "attested", storedShasum)
 				} else {
 					// Initialize rules
 					ruleEngine, err := rules.NewRuleEvaluator(ui, jsStorage)

@@ -356,7 +356,10 @@ func (typedData *TypedData) EncodeData(primaryType string, data map[string]inter
 
 	// Verify extra data
 	if exp, got := len(typedData.Types[primaryType]), len(data); exp < got {
-		return nil, fmt.Errorf("there is extra data provided in the message (%d < %d)", exp, got)
+		// TODO: WIP HSM KMS GUY
+		// TODO: this resolves the "eth_signTypedData_v4" issue
+		// return nil, fmt.Errorf("there is extra data provided in the message (%d < %d)", exp, got)
+		fmt.Printf("\n******* there is extra data provided in the message (%d < %d)\n\n", exp, got)
 	}
 
 	// Add typehash
@@ -654,6 +657,9 @@ func (typedData *TypedData) formatData(primaryType string, data map[string]inter
 
 func formatPrimitiveValue(encType string, encValue interface{}) (string, error) {
 	switch encType {
+	case "address[]":
+		// TODO: HSM KMS GUY
+		return "", fmt.Errorf("TODO: handle type of address array (%v)", encType)
 	case "address":
 		if stringValue, ok := encValue.(string); !ok {
 			return "", fmt.Errorf("could not format value %v as address", encValue)

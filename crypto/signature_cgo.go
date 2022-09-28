@@ -26,6 +26,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/common/math"
 	"github.com/ethereum/go-ethereum/crypto/secp256k1"
+	// TODO: HSM KMS GUY
 	// "github.com/ethereum/go-ethereum/log"
 )
 
@@ -54,6 +55,7 @@ func SigToPub(hash, sig []byte) (*ecdsa.PublicKey, error) {
 //
 // The produced signature is in the [R || S || V] format where V is 0 or 1.
 func Sign(digestHash []byte, prv *ecdsa.PrivateKey) (sig []byte, err error) {
+	// TODO: HSM KMS GUY
 	//log.Info("signature_cgo.go Sign(digestHash, PrivateKey)")
 	//log.Info("HSM", "digestHash", digestHash)
 	//log.Info("HSM", "PrivateKey", prv)
@@ -61,6 +63,7 @@ func Sign(digestHash []byte, prv *ecdsa.PrivateKey) (sig []byte, err error) {
 		return nil, fmt.Errorf("hash is required to be exactly %d bytes (%d)", DigestLength, len(digestHash))
 	}
 	seckey := math.PaddedBigBytes(prv.D, prv.Params().BitSize/8)
+	// TODO: HSM KMS GUY
 	//log.Info("HSM", "seckey", seckey)
 	// str1 := fmt.Sprintf("%x", seckey)
 	//log.Info("HSM:", "seckey:", str1)

@@ -27,7 +27,8 @@ import (
 
 	"github.com/urfave/cli/v2"
 
-	// TODO: :HSM: :KMS:
+	// TODO: HSM KMS ARTEMA GUY
+	// hsm "github.com/artemalabs/hsm/yakwallet"
 	hsm "github.com/artemalabs/hsm/yakwallet"
 
 	"github.com/ethereum/go-ethereum/accounts/external"
@@ -309,10 +310,16 @@ func setAccountManagerBackends(stack *node.Node) error {
 	// accounts in both externally and locally, plus very racey.
 	am.AddBackend(keystore.NewKeyStore(keydir, scryptN, scryptP))
 
-	if kmsstore, err := hsm.NewKmsBackend("HSM::KMS"); err != nil {
-		log.Error(fmt.Sprintf("Failed to start hsm.NewKmsBackend(HSM::KMS), disabling: %v", err))
+	// TODO: WIP ARTEMA GUY ADD KMS SIGNING BACKEND TO GETH FOR CLIQUE SIGNING:
+	if true {
+		log.Info("setAccountManagerBackends: ENABLED ARTEMALABS HSM:KSM ACCOUNT MANAGER")
+		if kmsstore, err := hsm.NewKmsBackend("HSM::KMS"); err != nil {
+			log.Error(fmt.Sprintf("Failed to start hsm.NewKmsBackend(HSM::KMS), disabling: %v", err))
+		} else {
+			am.AddBackend(kmsstore)
+		}
 	} else {
-		am.AddBackend(kmsstore)
+		log.Warn("setAccountManagerBackends: DISABLED ARTEMALABS HSM:KSM ACCOUNT MANAGER")
 	}
 
 	if conf.USB {
