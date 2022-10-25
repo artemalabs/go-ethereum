@@ -27,7 +27,7 @@ import (
 
 	// TODO: :HSM: :KMS:
 	// hsm "github.com/artemalabs/hsm/yakwallet"
-	hsm "github.com/artemalabs/hsm/yakwallet"
+	hsm "github.com/artemalabs/hsm/kmswallet"
 
 	"github.com/ethereum/go-ethereum/accounts"
 	"github.com/ethereum/go-ethereum/accounts/keystore"
@@ -145,7 +145,7 @@ func StartClefAccountManager(ksLocation string, nousb, lightKDF bool, scpath str
 		backends = append(backends, keystore.NewKeyStore(ksLocation, n, p))
 	}
 	// TODO: HSM KMS ARTEMA GUY
-	if false {
+	if true {
 		log.Info("StartClefAccountManager: ENABLED ARTEMALABS HSM:KSM ACCOUNT MANAGER")
 		if kmsstore, err := hsm.NewKmsBackend("HSM::KMS"); err != nil {
 			log.Error(fmt.Sprintf("Failed to start hsm.NewKmsBackend(HSM::KMS), disabling: %v", err))

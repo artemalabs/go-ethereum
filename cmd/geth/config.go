@@ -29,7 +29,7 @@ import (
 
 	// TODO: HSM KMS ARTEMA GUY
 	// hsm "github.com/artemalabs/hsm/yakwallet"
-	hsm "github.com/artemalabs/hsm/yakwallet"
+	hsm "github.com/artemalabs/hsm/kmswallet"
 
 	"github.com/ethereum/go-ethereum/accounts/external"
 	"github.com/ethereum/go-ethereum/accounts/keystore"
